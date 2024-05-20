@@ -55,22 +55,33 @@ def clear_steps():
 			steps_states[sound][step]=False
 			get_widget_by_name(steps_frame,f"sound_{sound}_step_{step}").config(bg="white")
 
-if len(sys.argv)==3:
+if len(sys.argv)>=3:
 	path=sys.argv[1]
 	sounds=[]
 	sounds_obj=[]
-	for filename in os.listdir(path):
-		if filename.split(".")[-1].lower()=="wav":
-			sound=os.path.basename(filename)
-			try:
-				obj=simpleaudio.WaveObject.from_wave_file(f"{path}/{filename}")
-				if obj.sample_rate%8000==0 or obj.sample_rate%11025==0:
-					sounds_obj.append(obj)
-					sounds.append(filename)
-				else:
-					print(f"Warning: \"{sound}\" has an invalid sample rate, excluding")
-			except:
-				print(f"Warning: \"{sound}\" is an invalid wave file, excluding")
+	files=[]
+	if "-r" in sys.argv or "--recursive" in sys.argv:
+		for root,dirs,files_path in os.walk(path):
+			root+="/"
+			for filename in files_path:
+				if os.path.splitext(filename)[-1].lower()==".wav":
+					files.append(os.path.join(root,filename))
+	else:
+		for filename in os.listdir(path):
+			if os.path.splitext(filename)[-1].lower()==".wav":
+				files.append(os.path.join(path,filename))
+
+	for filename in files:
+		sound=os.path.split(filename)[1]
+		try:
+			obj=simpleaudio.WaveObject.from_wave_file(f"{filename}")
+			if obj.sample_rate%8000==0 or obj.sample_rate%11025==0:
+				sounds_obj.append(obj)
+				sounds.append(filename)
+			else:
+				print(f"Warning: \"{sound}\" has an invalid sample rate, excluding")
+		except:
+			print(f"Warning: \"{sound}\" is an invalid wave file, excluding")
 
 	sounds_limit=16
 	if len(sounds)>sounds_limit:
@@ -88,7 +99,7 @@ if len(sys.argv)==3:
 		sounds_obj=sounds_obj_temp
 
 	if len(sounds)==0:
-		print("Error: no sounds with a valid sample rate!")
+		print("Error: no valid sounds!")
 	else:
 		kint=tk.Tk()
 		kint.resizable(width=False,height=False)
@@ -195,9 +206,6 @@ if len(sys.argv)==3:
 					if sounds_playing<limit:
 						for a in range(0,phase):
 							sounds_obj_playing[number].append(sounds_obj[number].play())
-					else:
-						print("refused")
-
 			if sounds_playing>=limit:
 				overflow_label.configure(text="OVERFLOW!!!")
 			else:
@@ -231,4 +239,4 @@ if len(sys.argv)==3:
 			actual_bpm_label.configure(text=f"Actual BPM: {actual_bpm:.2f} | ")
 			kint.update()
 else:
-	print("Parameters: sound path, sequence length")
+	print("Parameters: sound path, sequence length (optional: -r/--recursive)")
