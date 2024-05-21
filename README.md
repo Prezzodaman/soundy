@@ -10,6 +10,7 @@ Funny little step sequencer thing that uses Tkinter and Simpleaudio!
 * Mutes and unmutes
 * A monophonic mode for each sound which almost works (because when the sound plays again, it doesn't cut out immediately)
 * Extremely naive "overflow" feature that attempts to stop too many sounds playing at once (which can still happen, crashing the sound driver)
+* Synchronizing two instances of Soundy (using the -m/--master or -s/--slave option)
 
 Thus, based on these features, Soundy is a highly professional music tool that's useful for all occasions.
 
